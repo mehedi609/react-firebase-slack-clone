@@ -18,6 +18,7 @@ class Register extends Component {
     password: '',
     passwordConfirmation: '',
     errors: [],
+    loading: false,
   };
 
   isFormValid = () => {
@@ -64,8 +65,9 @@ class Register extends Component {
   };
 
   handleSubmit = async (event) => {
+    event.preventDefault();
     if (this.isFormValid()) {
-      event.preventDefault();
+      this.setState({ errors: [], loading: true });
       try {
         const createdUser = await _firebase
           .auth()
@@ -75,9 +77,20 @@ class Register extends Component {
           );
         console.log(createdUser);
       } catch (e) {
-        console.log(e.message);
+        this.setState({ errors: [...this.state.errors, e] });
+        console.log(e);
+      } finally {
+        this.setState({ loading: false });
       }
     }
+  };
+
+  handleInputError = (errors, inputName) => {
+    return errors.some((error) =>
+      error.message.toLowerCase().includes(inputName)
+    )
+      ? 'error'
+      : '';
   };
 
   render() {
@@ -87,6 +100,7 @@ class Register extends Component {
       password,
       passwordConfirmation,
       errors,
+      loading,
     } = this.state;
 
     return (
@@ -117,6 +131,7 @@ class Register extends Component {
                 iconPosition="left"
                 placeholder="Email Address"
                 onChange={this.handleChange}
+                className={this.handleInputError(errors, 'email')}
                 type="email"
               />
 
@@ -128,6 +143,7 @@ class Register extends Component {
                 iconPosition="left"
                 placeholder="Password"
                 onChange={this.handleChange}
+                className={this.handleInputError(errors, 'password')}
                 type="password"
               />
 
@@ -139,10 +155,17 @@ class Register extends Component {
                 iconPosition="left"
                 placeholder="Password Confirmation"
                 onChange={this.handleChange}
+                className={this.handleInputError(errors, 'password')}
                 type="password"
               />
 
-              <Button color="orange" fluid size="large">
+              <Button
+                disabled={loading}
+                className={loading ? 'loading' : ''}
+                color="orange"
+                fluid
+                size="large"
+              >
                 Submit
               </Button>
             </Segment>
