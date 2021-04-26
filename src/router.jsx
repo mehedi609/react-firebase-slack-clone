@@ -1,21 +1,38 @@
-import React, {Component} from 'react';
-import {BrowserRouter, Route, Switch} from "react-router-dom";
-import App from "./component/App";
-import Register from "./component/Auth/Register";
-import Login from "./component/Auth/Login";
+import React, { Component } from 'react';
+import { Route, Switch, withRouter } from 'react-router-dom';
+import App from './component/App';
+import Register from './component/Auth/Register';
+import Login from './component/Auth/Login';
+import { _firebase } from './config/firebase';
+import { setUser } from './actions/userActions';
+import { connect } from 'react-redux';
+import Spinner from './Spinner';
 
 class Router extends Component {
-    render() {
-        return (
-            <BrowserRouter>
-                <Switch>
-                    <Route exact path='/' component={App}/>
-                    <Route path='/login' component={Login}/>
-                    <Route path='/register' component={Register}/>
-                </Switch>
-            </BrowserRouter>
-        );
-    }
+  componentDidMount() {
+    _firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        this.props.setUser(user);
+        this.props.history.push('/');
+      }
+    });
+  }
+
+  render() {
+    return this.props.isLoading ? (
+      <Spinner />
+    ) : (
+      <Switch>
+        <Route exact path="/" component={App} />
+        <Route path="/login" component={Login} />
+        <Route path="/register" component={Register} />
+      </Switch>
+    );
+  }
 }
 
-export default Router;
+const mapStateFromProps = (state) => ({
+  isLoading: state.user.isLoading,
+});
+
+export default withRouter(connect(mapStateFromProps, { setUser })(Router));
