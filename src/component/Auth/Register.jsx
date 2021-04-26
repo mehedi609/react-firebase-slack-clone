@@ -67,17 +67,14 @@ class Register extends Component {
   };
 
   handleSubmit = async (event) => {
-    const { username, errors, usersRef } = this.state;
+    const { username, errors, usersRef, email, password } = this.state;
     event.preventDefault();
     if (this.isFormValid()) {
       this.setState({ errors: [], loading: true });
       try {
         const createdUser = await _firebase
           .auth()
-          .createUserWithEmailAndPassword(
-            this.state.email,
-            this.state.password
-          );
+          .createUserWithEmailAndPassword(email, password);
 
         await createdUser.user.updateProfile({
           displayName: username,
