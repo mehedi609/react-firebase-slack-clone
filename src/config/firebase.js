@@ -9,9 +9,12 @@ const firebaseConfig = {
     projectId: "react-slack-clone-6999c",
     storageBucket: "react-slack-clone-6999c.appspot.com",
     messagingSenderId: "897590857888",
-    appId: "1:897590857888:web:e7805cd1c8f5b198c1f9c5"
+    appId: "1:897590857888:web:e7805cd1c8f5b198c1f9c5",
+    locationId: "asia-southeast2",
 };
 // Initialize Firebase
-export const _firebase = firebase.initializeApp(firebaseConfig);
+const _firebase = firebase.initializeApp(firebaseConfig);
 
 export default firebase;
+
+export {_firebase}

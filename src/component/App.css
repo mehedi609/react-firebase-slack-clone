@@ -1,3 +1,8 @@
-body {
-    background-color: #bab3b3;
+html,
+body,
+.app {
+    height: 100vh;
+    /*background: #eee;*/
+    background-color: #d7d4d4;
+    padding: 1em;
 }
