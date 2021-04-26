@@ -10,6 +10,7 @@ import {
 } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import { _firebase } from '../../config/firebase';
+import md5 from 'uuid';
 
 class Register extends Component {
   state = {
@@ -19,6 +20,7 @@ class Register extends Component {
     passwordConfirmation: '',
     errors: [],
     loading: false,
+    usersRef: _firebase.database().ref('users'),
   };
 
   isFormValid = () => {
@@ -65,6 +67,7 @@ class Register extends Component {
   };
 
   handleSubmit = async (event) => {
+    const { username, errors, usersRef } = this.state;
     event.preventDefault();
     if (this.isFormValid()) {
       this.setState({ errors: [], loading: true });
@@ -75,9 +78,24 @@ class Register extends Component {
             this.state.email,
             this.state.password
           );
+
+        await createdUser.user.updateProfile({
+          displayName: username,
+          photoURL: `http://gravatar.com/avatar/${md5(
+            createdUser.user.email
+          )}?d=identicon`,
+        });
+
         console.log(createdUser);
+
+        const { uid, displayName, photoURL } = createdUser.user;
+
+        await usersRef.child(uid).set({
+          name: displayName,
+          avatar: photoURL,
+        });
       } catch (e) {
-        this.setState({ errors: [...this.state.errors, e] });
+        this.setState({ errors: [...errors, e] });
         console.log(e);
       } finally {
         this.setState({ loading: false });
@@ -106,7 +124,7 @@ class Register extends Component {
     return (
       <Grid textAlign="center" verticalAlign="middle" className="app">
         <Grid.Column style={{ maxWidth: 450 }}>
-          <Header as="h2" icon color="orange" textAlign="center">
+          <Header as="h1" icon color="orange" textAlign="center">
             <Icon name="puzzle piece" color="orange" />
             Register for DevChat
           </Header>
