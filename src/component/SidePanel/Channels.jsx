@@ -6,25 +6,51 @@ import { connect } from 'react-redux';
 
 class Channels extends Component {
   state = {
+    activeChannelId: '',
     user: this.props.currentUser,
     channels: [],
     channelName: '',
     channelDetails: '',
     channelsRef: _firebase.database().ref('channels'),
     modal: false,
+    firstLoad: true,
   };
 
   componentDidMount() {
     this.addListeners();
   }
 
+  componentWillUnmount() {
+    this.removeListeners();
+  }
+
   addListeners = () => {
     let loadedChannels = [];
     this.state.channelsRef.on('child_added', (snap) => {
       loadedChannels.push(snap.val());
-      this.setState({ channels: loadedChannels });
+      this.setState({ channels: loadedChannels }, this.setFirstChannel);
     });
   };
+
+  removeListeners = () => {
+    console.log('componentWillUnmount called');
+    this.state.channelsRef.off();
+  };
+
+  setFirstChannel = () => {
+    // const firstChannel = this.state.channels[0];
+    const { firstLoad, channels } = this.state;
+    if (firstLoad && channels.length > 0) {
+      const firstChannel = channels[0];
+      this.props.setCurrentChannel(firstChannel);
+      this.setActiveChannel(firstChannel);
+    }
+    this.setState({ firstLoad: false });
+  };
+
+  setActiveChannel(channel) {
+    this.setState({ activeChannelId: channel.id });
+  }
 
   handleChange = (event) => {
     const { name, value } = event.target;
@@ -65,6 +91,7 @@ class Channels extends Component {
 
   changeChannel = (channel) => {
     this.props.setCurrentChannel(channel);
+    this.setActiveChannel(channel);
   };
 
   displayChannels = (channels) =>
@@ -75,6 +102,7 @@ class Channels extends Component {
         onClick={() => this.changeChannel(channel)}
         name={channel.name}
         style={{ opacity: 0.7 }}
+        active={channel.id === this.state.activeChannelId}
       >
         # {channel.name}
       </Menu.Item>
