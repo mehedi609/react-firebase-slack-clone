@@ -4,7 +4,7 @@ import App from './component/App';
 import Register from './component/Auth/Register';
 import Login from './component/Auth/Login';
 import { _firebase } from './config/firebase';
-import { setUser } from './actions/userActions';
+import { clearUser, setUser } from './actions/userActions';
 import { connect } from 'react-redux';
 import Spinner from './Spinner';
 
@@ -14,6 +14,9 @@ class Router extends Component {
       if (user) {
         this.props.setUser(user);
         this.props.history.push('/');
+      } else {
+        this.props.history.push('/login');
+        this.props.clearUser();
       }
     });
   }
@@ -35,4 +38,6 @@ const mapStateFromProps = (state) => ({
   isLoading: state.user.isLoading,
 });
 
-export default withRouter(connect(mapStateFromProps, { setUser })(Router));
+export default withRouter(
+  connect(mapStateFromProps, { setUser, clearUser })(Router)
+);
